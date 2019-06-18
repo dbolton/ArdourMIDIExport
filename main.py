@@ -1,10 +1,23 @@
 import os
+from argparse import ArgumentParser
 from xml.dom.minidom import parse
 from mido import Message, MetaMessage, MidiFile, MidiTrack
+from predictGeneralMidi import getGeneralMidiNumber
 
 # Get Ardour file path
-print("Please enter the path to your Ardour file. (E.g. ~/Ardour Folder/My Session.ardour ")
-ardourFile = os.path.abspath(os.path.expanduser(input(": ")))
+parser = ArgumentParser()
+parser.add_argument("-f", "--file", dest="filename",
+                    help="Optionally include the Ardour source file from the command line. Use Linux-style path conventions (like  ~/Ardour Folder/My Session.ardour) or Windows (like C:/Users/username/Ardour Folder/My Session.ardour).", metavar="FILE")
+# parser.add_argument("-q", "--quiet",
+#                     action="store_false", dest="verbose", default=True,
+#                     help="don't print status messages to stdout")
+
+args = parser.parse_args()
+
+ardourFile = args.filename
+if not ardourFile:
+    print("Please enter the path to your Ardour file. (E.g. ~/Ardour Folder/My Session.ardour ")
+    ardourFile = os.path.abspath(os.path.expanduser(input(": ")))
 
 # Get import and export folder locations
 dom = parse(ardourFile)
@@ -22,8 +35,10 @@ trackRef = {} #ardour-track-id : midi-track-id
 i=0
 for route in dom.getElementsByTagName("Route"):
     if route.getAttribute("default-type") == "midi":
-        mid.add_track(name=route.getAttribute("name"))
-        mid.tracks[i].append(MetaMessage("instrument_name",name=route.getAttribute("name")))
+        rname = route.getAttribute("name")
+        mid.add_track(name=rname)
+        mid.tracks[i].append(MetaMessage("instrument_name",name=rname))
+        mid.tracks[i].append(Message('program_change', program=getGeneralMidiNumber(rname),time=0))
         trackRef[route.getAttribute("id")] = i
         i = i+1
 
@@ -38,11 +53,18 @@ for source in dom.getElementsByTagName("Source"):
 
 print(sourceRef)
 
+def convertToMeasuresAndBeats(time):
+    beatLength = 19200
+    beatsPerMeasure = 4
+    currentMeasure = int(totalTime/beatLength/beatsPerMeasure+1)
+    currentBeat = "{0:.4f}".format(totalTime/beatLength%beatsPerMeasure+1)
+    return "measure " + str(currentMeasure) + " beat " + str(currentBeat)
+
 # Iterate through the playlists in Ardour (each snippet of midi data) and save to a single, combined MIDI file
 for playlist in dom.getElementsByTagName("Playlist"):
     if playlist.getAttribute("type") == "midi":
         trackNum = trackRef[playlist.getAttribute("orig-track-id")]
-        print('Track',trackNum)
+        print('\n\nTrack',trackNum)
         for region in playlist.getElementsByTagName("Region"):
             print(os.path.join(importFolder,sourceRef[region.getAttribute("source-0")]))
             sourceMidi = MidiFile(os.path.join(importFolder,sourceRef[region.getAttribute("source-0")]))
@@ -53,15 +75,21 @@ for playlist in dom.getElementsByTagName("Playlist"):
             print("length",length)
             print("position",position)
             firstPass = True
+            totalTime = 0
             for msg in sourceMidi.tracks[0]:
                 if not msg.is_meta:
-                    if msg.time > start and msg.time < length:
+                    totalTime = totalTime + msg.time
+                    if totalTime > start and totalTime < length:
                         if firstPass:
-                              editedMsg = msg.copy(time=msg.time+position-start)
+                              firstTime = position+totalTime-start
+                              print('position',position,'+ totalTime',totalTime,'- start',start,'=',firstTime,'|',convertToMeasuresAndBeats(firstTime))
+                              editedMsg = msg.copy(time=firstTime)
                               firstPass = False
-                        editedMsg = msg.copy(time=msg.time)
+                        else:
+                            editedMsg = msg.copy(time=msg.time)
                         print(editedMsg)
                         mid.tracks[trackNum].append(editedMsg)
 
+
 mid.save(os.path.join(exportFolder,"ArdourMidiExport.mid"))
-print("File saved to your Ardour file's export folder")
+print("\nFile saved to your Ardour file's export folder")

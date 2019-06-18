@@ -9,4 +9,4 @@ This project lets your quickly compose in Ardour, but then export to notation so
 1. Install [python](https://python.org) and add to your path.
 2. From the command run: `pip install mido` (see [mido instructions](https://mido.readthedocs.io/en/latest/installing.html) for details).
 3. Run `python main.py`
-4. Open your MIDI file in your favorite notation software.
+4. Open the MIDI file in your favorite notation software.
