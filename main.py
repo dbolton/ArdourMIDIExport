@@ -53,42 +53,54 @@ for source in dom.getElementsByTagName("Source"):
 
 print(sourceRef)
 
-def convertToMeasuresAndBeats(time):
+def convertToMeasuresAndBeats(trackTotalTime):
+    #beatsPerSecond = 112
     beatLength = 19200
     beatsPerMeasure = 4
-    currentMeasure = int(totalTime/beatLength/beatsPerMeasure+1)
-    currentBeat = "{0:.4f}".format(totalTime/beatLength%beatsPerMeasure+1)
-    return "measure " + str(currentMeasure) + " beat " + str(currentBeat)
+    currentMeasure = int(trackTotalTime/beatLength/beatsPerMeasure+1)
+    currentBeat = "{0:.4f}".format(trackTotalTime/beatLength%beatsPerMeasure+1)
+    return "| trackTotalTime " + str(trackTotalTime) + " measure " + str(currentMeasure) + " beat " + str(currentBeat)
 
 # Iterate through the playlists in Ardour (each snippet of midi data) and save to a single, combined MIDI file
 for playlist in dom.getElementsByTagName("Playlist"):
     if playlist.getAttribute("type") == "midi":
         trackNum = trackRef[playlist.getAttribute("orig-track-id")]
         print('\n\nTrack',trackNum)
+        trackTotalTime = 0 #for tracking message times between regions
+        previousRegionEndTime = 0
         for region in playlist.getElementsByTagName("Region"):
             print(os.path.join(importFolder,sourceRef[region.getAttribute("source-0")]))
             sourceMidi = MidiFile(os.path.join(importFolder,sourceRef[region.getAttribute("source-0")]))
-            start = int(region.getAttribute("start"))
-            length = int(region.getAttribute("length"))
-            position = int(region.getAttribute("position"))
-            print("start",start)
-            print("length",length)
-            print("position",position)
+            startBeats = float(region.getAttribute("start-beats")) #beat that the MIDI source file starts on for this region
+            lengthBeats = float(region.getAttribute("length-beats")) #lengh of the region in beats
+            beat = float(region.getAttribute("beat")) #beats between the start of the music and the start of the region
+            trackTotalTime += beat*19200-previousRegionEndTime
             firstPass = True
-            totalTime = 0
+            sourceMidiTotalTime = 0
             for msg in sourceMidi.tracks[0]:
                 if not msg.is_meta:
-                    totalTime = totalTime + msg.time
-                    if totalTime > start and totalTime < length:
+                    sourceMidiTotalTime += msg.time
+
+                    #print('end track at tick:',lengthBeats*19200+startBeats*19200)
+                    firstTime = int((trackTotalTime-previousRegionEndTime) + (sourceMidiTotalTime-startBeats*19200))
+                    if sourceMidiTotalTime >= startBeats*19200 and sourceMidiTotalTime <= (lengthBeats+startBeats)*19200 and firstTime >= 0:
                         if firstPass:
-                              firstTime = position+totalTime-start
-                              print('position',position,'+ totalTime',totalTime,'- start',start,'=',firstTime,'|',convertToMeasuresAndBeats(firstTime))
-                              editedMsg = msg.copy(time=firstTime)
-                              firstPass = False
+                            print('trackTotalTime',convertToMeasuresAndBeats(trackTotalTime))
+                            print('sourceMidiTotalTime',convertToMeasuresAndBeats(sourceMidiTotalTime))
+                            print('startBeats',convertToMeasuresAndBeats(startBeats))
+                            firstTime = int((trackTotalTime-previousRegionEndTime) + (sourceMidiTotalTime-startBeats*19200))
+                            #print('position',position,'+ totalTime',totalTime,'- start',start,'=',firstTime,convertToMeasuresAndBeats(firstTime))
+                            editedMsg = msg.copy(time=firstTime)
+                            trackTotalTime = firstTime+previousRegionEndTime
+                            firstPass = False
+                            #if (firstTime<0):
+                            #    print("CAN'T HAVE NEGATIVE\n\n\n")
                         else:
                             editedMsg = msg.copy(time=msg.time)
-                        print(editedMsg)
+                            trackTotalTime += msg.time
+                        print(editedMsg,convertToMeasuresAndBeats(trackTotalTime))
                         mid.tracks[trackNum].append(editedMsg)
+            previousRegionEndTime = trackTotalTime
 
 
 mid.save(os.path.join(exportFolder,"ArdourMidiExport.mid"))
