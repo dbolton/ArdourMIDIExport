@@ -10,7 +10,7 @@ def getGeneralMidiNumber(name):
         p = 40
     elif re.search(r'Clarinet',name,re.IGNORECASE):
         p = 71
-    print(name,' program =',p)
+    #print(name,' program =',p)
     return p
 
 
