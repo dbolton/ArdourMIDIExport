@@ -8,10 +8,10 @@ from predictGeneralMidi import getGeneralMidiNumber
 # Process command line arguments
 parser = ArgumentParser()
 parser.add_argument("-f", "--file", dest="filename",
-                    help="Optionally include the Ardour source file from the command line. Use Linux-style path conventions (like  ~/Ardour Folder/My Session.ardour) or Windows (like C:/Users/username/Ardour Folder/My Session.ardour).", metavar="FILE")
+                    help="source FILE you would like to convert. Use Linux-style path conventions (like  ~/Ardour Folder/My Session.ardour) or Windows (like C:/Users/username/Ardour Folder/My Session.ardour).", metavar="FILE")
 parser.add_argument("-v", "--verbose",
                     action="store_true", dest="verbose", default=False,
-                    help="Display MIDI messages and other debugging information.")
+                    help="show MIDI messages and other debugging information.")
 
 args = parser.parse_args()
 
