@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 import logging as log
 from xml.dom.minidom import parse
-from mido import Message, MetaMessage, MidiFile, MidiTrack
+from mido import Message, MetaMessage, MidiFile, MidiTrack, bpm2tempo
 from predictGeneralMidi import getGeneralMidiNumber
 
 # Process command line arguments
@@ -46,6 +46,11 @@ for route in dom.getElementsByTagName("Route"):
         mid.add_track(name=rname)
         mid.tracks[i].append(MetaMessage("instrument_name",name=rname))
         mid.tracks[i].append(Message('program_change', program=getGeneralMidiNumber(rname),time=0))
+        beatsPerMinute = int(dom.getElementsByTagName("Tempo")[0].getAttribute("beats-per-minute"))
+        mid.tracks[i].append(MetaMessage("set_tempo",tempo=bpm2tempo(beatsPerMinute)))
+        meterNumerator = int(dom.getElementsByTagName("Meter")[0].getAttribute("divisions-per-bar"))
+        meterDenominator = int(dom.getElementsByTagName("Meter")[0].getAttribute("note-type"))
+        mid.tracks[i].append(MetaMessage("time_signature",numerator=meterNumerator, denominator=meterDenominator))
         trackRef[route.getAttribute("id")] = i
         i = i+1
 
@@ -59,6 +64,7 @@ for source in dom.getElementsByTagName("Source"):
         sourceRef[source.getAttribute("id")] = source.getAttribute("name")
 
 vprint(sourceRef)
+
 
 def convertToMeasuresAndBeats(trackTotalTime):
     #beatsPerSecond = 112

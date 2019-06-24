@@ -1,14 +1,42 @@
 import re
 
+# def in (trackName,searchName,programNumber):
+#     re.search(searchName,trackName,re.IGNORECASE)
+#     return True
+
 def getGeneralMidiNumber(name):
     p = 0 #program number
-    if re.search(r'Piano',name,re.IGNORECASE):
+    if re.search(r'Piano',name,re.I):
         p = 0
-    elif re.search(r'Bass',name,re.IGNORECASE):
+    elif re.search(r'Bass',name,re.I):
         p = 34
-    elif re.search(r'Violin',name,re.IGNORECASE):
+        """Strings
+
+            41 Violin
+            42 Viola
+            43 Cello
+            44 Contrabass
+            45 Tremolo Strings
+            46 Pizzicato Strings
+            47 Orchestral Harp
+            48 Timpani"""
+    elif re.search(r'Tremolo',name,re.I):
+        p = 44
+    elif re.search(r'Pizzicato',name,re.I):
+        p = 45
+    elif re.search(r'Violin',name,re.I):
         p = 40
-    elif re.search(r'Clarinet',name,re.IGNORECASE):
+    elif re.search(r'Viola',name,re.I):
+        p = 41
+    elif re.search(r'Cello',name,re.I):
+        p = 42
+    elif re.search(r'Contrabass',name,re.I):
+        p = 43
+    elif re.search(r'Harp',name,re.I):
+        p = 46
+    elif re.search(r'Timpani',name,re.I):
+        p = 47
+    elif re.search(r'Clarinet',name,re.I):
         p = 71
     #print(name,' program =',p)
     return p

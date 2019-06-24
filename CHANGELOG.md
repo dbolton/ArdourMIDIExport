@@ -1,5 +1,9 @@
 # Change log
 
+## next
+* export initial tempo and meter
+* predict General Midi program numbers for all orchestral strings
+
 ## 0.2
 * fixed import of tracks that start later in piece rather than at very beginning
 * fixed import of tracks with multiple regions (regions need to be non-overlapping)

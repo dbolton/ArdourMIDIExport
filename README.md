@@ -24,6 +24,6 @@ This project lets your quickly compose in Ardour, but then export to notation so
 </dl>
 
 ## Limitations
-* Export ignores any tempo changes (due to the complexity of extracting that information from Ardour)
+* Exports the initial tempo and meter but ignores any changes later in the file.
 * Export fails on any overlapping regions. For accurate results, remove any overlapping regions in your Ardour session before exporting. (Technically, only overlapping events between two regions are a problem.)
 * Almost all MIDI data (beyond pitches, rhythms, and track names) is open to interpretation by your notation software. If you haven't quantized in Ardour, even the rhythms are open to interpretation.
