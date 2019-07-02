@@ -6,17 +6,17 @@ import re
 
 def getGeneralMidiNumber(name):
     p = 0 #program number
-        """
-        Piano
+    """
+    Piano
 
-            1 Acoustic Grand Piano
-            2 Bright Acoustic Piano
-            3 Electric Grand Piano
-            4 Honky-tonk Piano
-            5 Electric Piano 1
-            6 Electric Piano 2
-            7 Harpsichord
-            8 Clavinet"""
+        1 Acoustic Grand Piano
+        2 Bright Acoustic Piano
+        3 Electric Grand Piano
+        4 Honky-tonk Piano
+        5 Electric Piano 1
+        6 Electric Piano 2
+        7 Harpsichord
+        8 Clavinet"""
     if re.search(r'Piano',name,re.I):
         p = 0
         if re.search(r'Bright',name,re.I):
@@ -76,14 +76,14 @@ def getGeneralMidiNumber(name):
             24 Tango Accordion"""
     elif re.search(r'Organ',name,re.I):
         p = 19
-            if re.search(r'Drawbar',name,re.I):
-                p = 16
-            elif re.search(r'Percussive',name,re.I):
-                p = 17
-            elif re.search(r'Rock',name,re.I):
-                p = 18
-            elif re.search(r'Reed',name,re.I):
-                p = 20
+        if re.search(r'Drawbar',name,re.I):
+            p = 16
+        elif re.search(r'Percussive',name,re.I):
+            p = 17
+        elif re.search(r'Rock',name,re.I):
+            p = 18
+        elif re.search(r'Reed',name,re.I):
+            p = 20
     elif re.search(r'Accordion',name,re.I):
         p = 21
         if re.search(r'Tango',name,re.I):
@@ -143,6 +143,7 @@ def getGeneralMidiNumber(name):
         elif re.search(r'synth',name,re.I):
             p = 38
             if re.search(r'2',name,re.I) or re.search(r'II',name,re.I):
+                p = 39
         """
         Strings
 
