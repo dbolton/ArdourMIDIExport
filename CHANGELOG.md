@@ -3,6 +3,7 @@
 ## next
 * export initial tempo and meter
 * predict General Midi program numbers for all orchestral strings
+* added command line argument for MuseScore (to work around MIDI import of piano tracks)
 
 ## 0.2
 * fixed import of tracks that start later in piece rather than at very beginning

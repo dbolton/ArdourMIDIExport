@@ -1,6 +1,7 @@
 import os
 from argparse import ArgumentParser
 import logging as log
+import re
 from xml.dom.minidom import parse
 from mido import Message, MetaMessage, MidiFile, MidiTrack, bpm2tempo
 from predictGeneralMidi import getGeneralMidiNumber
@@ -9,9 +10,13 @@ from predictGeneralMidi import getGeneralMidiNumber
 parser = ArgumentParser()
 parser.add_argument("-f", "--file", dest="filename",
                     help="source FILE you would like to convert. Use Linux-style path conventions (like  ~/Ardour Folder/My Session.ardour) or Windows (like C:/Users/username/Ardour Folder/My Session.ardour).", metavar="FILE")
+parser.add_argument("-m", "--musescore",
+                    action="store_true", dest="musescore", default=False,
+                    help="works around a quirk in MuseScore MIDI import. MuseScore assumes any piano part should have two tracks, so this setting adds a second track (containing a single note) after any piano track.")
 parser.add_argument("-v", "--verbose",
                     action="store_true", dest="verbose", default=False,
                     help="show MIDI messages and other debugging information.")
+
 
 args = parser.parse_args()
 
@@ -45,7 +50,7 @@ for route in dom.getElementsByTagName("Route"):
         rname = route.getAttribute("name")
         mid.add_track(name=rname)
         mid.tracks[i].append(MetaMessage("instrument_name",name=rname))
-        mid.tracks[i].append(Message('program_change', program=getGeneralMidiNumber(rname),time=0))
+        mid.tracks[i].append(Message("program_change", program=getGeneralMidiNumber(rname),time=0))
         beatsPerMinute = int(dom.getElementsByTagName("Tempo")[0].getAttribute("beats-per-minute"))
         mid.tracks[i].append(MetaMessage("set_tempo",tempo=bpm2tempo(beatsPerMinute)))
         meterNumerator = int(dom.getElementsByTagName("Meter")[0].getAttribute("divisions-per-bar"))
@@ -53,6 +58,15 @@ for route in dom.getElementsByTagName("Route"):
         mid.tracks[i].append(MetaMessage("time_signature",numerator=meterNumerator, denominator=meterDenominator))
         trackRef[route.getAttribute("id")] = i
         i = i+1
+        if args.musescore and getGeneralMidiNumber(rname)==0:
+            mid.add_track(name=rname+"-secondTrack")
+            mid.tracks[i].append(MetaMessage("instrument_name",name=rname))
+            mid.tracks[i].append(Message("program_change", program=getGeneralMidiNumber(rname),time=0))
+            mid.tracks[i].append(Message("note_on", channel=0, note=60, velocity=3, time=0))
+            mid.tracks[i].append(MetaMessage("lyrics",text="DeleteThisNote",time=0))
+            mid.tracks[i].append(Message("note_off", channel=0, note=60, velocity=3, time=9599))#eighth note, middle C
+            trackRef["secondTrack"] = i
+            i = i+1
 
 vprint(trackRef)
 

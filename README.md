@@ -19,6 +19,9 @@ This project lets your quickly compose in Ardour, but then export to notation so
 <dt>-f FILE, --file FILE</dt>
 <dd>source FILE you would like to convert. Use Linux-style path conventions (like  ~/Ardour Folder/My Session.ardour) or Windows (like C:/Users/username/Ardour Folder/My Session.ardour).</dd>
 
+<dt>-m, --musescore</dt>
+<dd>works around a quirk in MuseScore MIDI import. MuseScore assumes any piano part should have two tracks, so this setting adds a second track (containing a single note) after any piano track.</dd>
+
 <dt>-v, --verbose</dt>
 <dd>show MIDI messages and other debugging information</dd>
 </dl>
