@@ -122,8 +122,9 @@ for playlist in dom.getElementsByTagName("Playlist"):
                         else:
                             editedMsg = msg.copy(time=msg.time)
                             trackTotalTime += msg.time
-                        vprint(editedMsg,convertToMeasuresAndBeats(trackTotalTime))
-                        mid.tracks[trackNum].append(editedMsg)
+                        if sourceMidiTotalTime < (lengthBeats+startBeats)*19200 or msg.type == 'note_off': #ignore note_on events at very end
+                            vprint(editedMsg,convertToMeasuresAndBeats(trackTotalTime))
+                            mid.tracks[trackNum].append(editedMsg)
             previousRegionEndTime = trackTotalTime
 
 
