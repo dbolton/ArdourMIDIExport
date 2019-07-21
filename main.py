@@ -85,6 +85,9 @@ for source in dom.getElementsByTagName("Source"):
 
 vprint(sourceRef)
 
+noteOnRef = {} #Reference for which notes are on (1) or off (0) so that all notes can be turnned off at the end of the region
+for i in range(0, 127):
+    noteOnRef[i] = 0
 
 def convertToMeasuresAndBeats(trackTotalTime):
     #beatsPerSecond = 112
@@ -115,6 +118,10 @@ for playlist in dom.getElementsByTagName("Playlist"):
                     sourceMidiTotalTime += msg.time
                     firstTime = int((trackTotalTime-previousRegionEndTime) + (sourceMidiTotalTime-startBeats*19200))
                     if sourceMidiTotalTime >= startBeats*19200 and sourceMidiTotalTime <= (lengthBeats+startBeats)*19200:
+                        if msg.type == "note_on":
+                            noteOnRef[msg.note] = 1
+                        elif msg.type == "note_off":
+                            noteOnRef[msg.note] = 0
                         if firstTime < 0:
                             print("\n\nERROR: Overlapping regions on Track",mid.tracks[trackNum].name,convertToMeasuresAndBeats(firstTime+previousRegionEndTime),'\n\n\n\n')
                         if firstPass:
@@ -131,6 +138,11 @@ for playlist in dom.getElementsByTagName("Playlist"):
                         if sourceMidiTotalTime < (lengthBeats+startBeats)*19200 or msg.type == 'note_off': #ignore note_on events at very end
                             vprint(editedMsg,convertToMeasuresAndBeats(trackTotalTime))
                             mid.tracks[trackNum].append(editedMsg)
+                    else:
+                        for i in range(0, 127):
+                            if noteOnRef[i] == 1:
+                                mid.tracks[trackNum].append(Message('note_off',note=i))
+                                noteOnRef[i] = 0
             previousRegionEndTime = trackTotalTime
 
 
