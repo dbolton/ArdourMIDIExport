@@ -128,7 +128,7 @@ def getGeneralMidiNumber(name):
             38 Slap Bass 2
             39 Synth Bass 1
             40 Synth Bass 2"""
-    elif re.search(r'Bass',name,re.I):
+    elif re.search(r'Bass',name,re.I) and not re.search(r'Drum',name,re.I) and not re.search(r'Clarinet',name,re.I) and not re.search(r'Bassoon',name,re.I):
         p = 33#electric (finger)
         if re.search(r'acoustic',name,re.I):
             p = 32
@@ -217,7 +217,7 @@ def getGeneralMidiNumber(name):
         p = 57
     elif re.search(r'Tuba',name,re.I):
         p = 58
-    elif re.search(r'Horn',name,re.I) and not re.search(r'English',name,re.I):
+    elif re.search(r'Horn',name,re.I) and not re.search(r'English',name,re.I) or re.search(r'Euphonium',name,re.I):
         p = 60
     elif re.search(r'Brass',name,re.I):
         p = 61
@@ -237,7 +237,7 @@ def getGeneralMidiNumber(name):
             71 Bassoon
             72 Clarinet"""
     elif re.search(r'Sax',name,re.I):
-        p = 66 #alto sax
+        p = 65 #alto sax
         if re.search(r'Soprano',name,re.I):
             p = 64
         elif re.search(r'Tenor',name,re.I):
@@ -248,7 +248,7 @@ def getGeneralMidiNumber(name):
         p = 68
     elif re.search(r'English Horn',name,re.I) or re.search(r'Cors? Anglais',name,re.I):
         p = 69
-    elif re.search(r'Basson',name,re.I):
+    elif re.search(r'Bassoon',name,re.I):
         p = 70
     elif re.search(r'Clarinet',name,re.I):
         p = 71
@@ -306,6 +306,8 @@ def getGeneralMidiNumber(name):
             p = 86
         elif re.search(r'8',name,re.I) or re.search(r'bass',name,re.I) or re.search(r'lead',name,re.I):
             p = 87
+    elif re.search(r'(Drum|Snare|side stick|rimshot|tom|bongo|conga|timbale|guiro|cuica)',name,re.I) or re.search(r'(cymbal|hi-hat|triangle|ride bell)',name,re.I) or re.search(r'(clap|tambourine|cowbell|vibra slap|cabasa|maracas|whistle|claves)',name,re.I):
+        p =-10 #signal that we need to use channel 10 (percussion channel)
     return p
 
 

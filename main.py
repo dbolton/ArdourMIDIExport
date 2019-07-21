@@ -50,7 +50,13 @@ for route in dom.getElementsByTagName("Route"):
         rname = route.getAttribute("name")
         mid.add_track(name=rname)
         mid.tracks[i].append(MetaMessage("instrument_name",name=rname))
-        mid.tracks[i].append(Message("program_change", program=getGeneralMidiNumber(rname),time=0))
+        programNumber = getGeneralMidiNumber(rname)
+        if programNumber == -10:
+            mid.tracks[i].append(MetaMessage("channel_prefix", channel=10,time=0))
+            if args.musescore:
+                mid.tracks[i].append(Message("program_change", program=56,time=0)) #avoids the double staff for program=0 in MuseScore
+        else:
+            mid.tracks[i].append(Message("program_change", program=programNumber,time=0))
         beatsPerMinute = int(dom.getElementsByTagName("Tempo")[0].getAttribute("beats-per-minute"))
         mid.tracks[i].append(MetaMessage("set_tempo",tempo=bpm2tempo(beatsPerMinute)))
         meterNumerator = int(dom.getElementsByTagName("Meter")[0].getAttribute("divisions-per-bar"))
@@ -58,10 +64,10 @@ for route in dom.getElementsByTagName("Route"):
         mid.tracks[i].append(MetaMessage("time_signature",numerator=meterNumerator, denominator=meterDenominator))
         trackRef[route.getAttribute("id")] = i
         i = i+1
-        if args.musescore and getGeneralMidiNumber(rname)==0:
+        if args.musescore and programNumber==0:
             mid.add_track(name=rname+"-secondTrack")
             mid.tracks[i].append(MetaMessage("instrument_name",name=rname))
-            mid.tracks[i].append(Message("program_change", program=getGeneralMidiNumber(rname),time=0))
+            mid.tracks[i].append(Message("program_change", program=programNumber,time=0))
             mid.tracks[i].append(Message("note_on", channel=0, note=60, velocity=3, time=0))
             mid.tracks[i].append(MetaMessage("lyrics",text="DeleteThisNote",time=0))
             mid.tracks[i].append(Message("note_off", channel=0, note=60, velocity=3, time=9599))#eighth note, middle C
