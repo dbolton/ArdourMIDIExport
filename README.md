@@ -22,6 +22,9 @@ This project lets your quickly compose in Ardour, but then export to notation so
 <dt>-m, --musescore</dt>
 <dd>works around a quirk in MuseScore MIDI import. MuseScore assumes any piano part should have two tracks, so this setting adds a second track (containing a single note) after any piano track.</dd>
 
+<dt>-op, --omitparens</dt>
+<dd>omits any text in the track name that is inside parentheses () or square brackets []</dd>
+
 <dt>-v, --verbose</dt>
 <dd>show MIDI messages and other debugging information</dd>
 </dl>

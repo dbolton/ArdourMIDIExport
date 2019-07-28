@@ -13,6 +13,9 @@ parser.add_argument("-f", "--file", dest="filename",
 parser.add_argument("-m", "--musescore",
                     action="store_true", dest="musescore", default=False,
                     help="works around a quirk in MuseScore MIDI import. MuseScore assumes any piano part should have two tracks, so this setting adds a second track (containing a single note) after any piano track.")
+parser.add_argument("-op", "--omitparens",
+                    action="store_true", dest="omitparens", default=False,
+                    help="omits any text in the track name that is inside parentheses () or square brackets []")
 parser.add_argument("-v", "--verbose",
                     action="store_true", dest="verbose", default=False,
                     help="show MIDI messages and other debugging information.")
@@ -48,6 +51,9 @@ i=0
 for route in dom.getElementsByTagName("Route"):
     if route.getAttribute("default-type") == "midi":
         rname = route.getAttribute("name")
+        if args.omitparens:
+            p = re.compile("(.*)(\(.*\))(.*)")
+            rname = p.sub(r"\1\3",rname).strip()
         mid.add_track(name=rname)
         mid.tracks[i].append(MetaMessage("instrument_name",name=rname))
         programNumber = getGeneralMidiNumber(rname)
