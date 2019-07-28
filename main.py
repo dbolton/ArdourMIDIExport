@@ -15,7 +15,7 @@ parser.add_argument("-m", "--musescore",
                     help="works around a quirk in MuseScore MIDI import. MuseScore assumes any piano part should have two tracks, so this setting adds a second track (containing a single note) after any piano track.")
 parser.add_argument("-op", "--omitparens",
                     action="store_true", dest="omitparens", default=False,
-                    help="omits any text in the track name that is inside parentheses () or square brackets []")
+                    help="omits any text in the track name that is inside parentheses () or square brackets [].")
 parser.add_argument("-v", "--verbose",
                     action="store_true", dest="verbose", default=False,
                     help="show MIDI messages and other debugging information.")
